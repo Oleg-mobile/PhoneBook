@@ -17,13 +17,14 @@ namespace PhoneBook.WebApi.Controllers
         [HttpGet("[action]")]
         public IActionResult GetAll(string? key = null)
         {
-            var contacts = _context.Contacts.ToList();
+            IQueryable<Contact> query = _context.Contacts;
             if (!string.IsNullOrEmpty(key))
             {
-                contacts = contacts.Where(c =>
+                query = query.Where(c =>
                     c.Name.Trim().ToLower().Contains(key.Trim().ToLower()) ||
-                    c.Surname.Trim().ToLower().Contains(key.Trim().ToLower())).ToList();
+                    c.Surname.Trim().ToLower().Contains(key.Trim().ToLower()));
             }
+            var contacts = query.ToList();
             return Ok(contacts);
         }
 
@@ -32,42 +33,48 @@ namespace PhoneBook.WebApi.Controllers
         {
             var item = _context.Contacts.FirstOrDefault(i => i.Name == contact.Name && i.Surname == contact.Surname);
 
-            if (item is null)
+            if (item is not null)
             {
-                _context.Contacts.Add(contact);
-                _context.SaveChanges();
+                return BadRequest($"Контакт {contact.Name} {contact.Surname} уже существует");
             }
+
+            _context.Contacts.Add(contact);
+            _context.SaveChanges();
             return Ok();
         }
 
         [HttpDelete("[action]")]
         public IActionResult Delete(int id)
         {
-            var contact = _context.Contacts.Find(id);
+            var contact = _context.Contacts.FirstOrDefault(c => c.Id == id);
 
-            if (contact is not null)
+            if (contact is null)
             {
-                _context.Contacts.Remove(contact);
-                _context.SaveChanges();
+                return BadRequest($"Контакт с Id = {id} не существует");
             }
+
+            _context.Contacts.Remove(contact);
+            _context.SaveChanges();
             return Ok();
         }
 
         [HttpPost("[action]")]
-        public IActionResult Update(int id, Contact contact)
+        public IActionResult Update(Contact contact)
         {
-            var item = _context.Contacts.FirstOrDefault(i => i.Id == id);
+            var item = _context.Contacts.FirstOrDefault(i => i.Id == contact.Id);
 
-            if (item is not null)
+            if (item is null)
             {
-                item.Name = contact.Name;
-                item.Surname = contact.Surname;
-                item.Phone = contact.Phone;
-                item.Email = contact.Email;
-
-                _context.Contacts.Update(item);
-                _context.SaveChanges();
+                return BadRequest($"Контакт с Id = {contact.Id} не существует");
             }
+
+            item.Name = contact.Name;
+            item.Surname = contact.Surname;
+            item.Phone = contact.Phone;
+            item.Email = contact.Email;
+
+            _context.Contacts.Update(item);
+            _context.SaveChanges();
             return Ok();
         }
     }

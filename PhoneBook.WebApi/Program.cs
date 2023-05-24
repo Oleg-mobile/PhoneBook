@@ -13,6 +13,8 @@ builder.Services.AddSwaggerGen();
 var connectionString = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<PhoneBookContext>(o => o.UseSqlServer(connectionString));
 
+builder.Services.AddCors(c => c.AddPolicy("Contacts", p => p.AllowAnyMethod().AllowAnyOrigin().AllowAnyHeader()));
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -23,6 +25,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors("Contacts");
 
 app.UseAuthorization();
 
