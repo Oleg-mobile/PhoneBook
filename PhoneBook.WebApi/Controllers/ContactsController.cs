@@ -22,7 +22,9 @@ namespace PhoneBook.WebApi.Controllers
             {
                 query = query.Where(c =>
                     c.Name.Trim().ToLower().Contains(key.Trim().ToLower()) ||
-                    c.Surname.Trim().ToLower().Contains(key.Trim().ToLower()));
+                    c.Surname.Trim().ToLower().Contains(key.Trim().ToLower()) ||
+                    c.Phone.Trim().ToLower().Contains(key.Trim().ToLower()) ||
+                    c.Email.Trim().ToLower().Contains(key.Trim().ToLower()));
             }
             var contacts = query.ToList();
             return Ok(contacts);
