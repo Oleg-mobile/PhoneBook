@@ -79,5 +79,16 @@ namespace PhoneBook.WebApi.Controllers
             _context.SaveChanges();
             return Ok();
         }
+
+        [HttpGet("[action]")]
+        public IActionResult Get(int id)
+        {
+            var contact = _context.Contacts.FirstOrDefault(i => i.Id == id);
+            if (contact is null)
+            {
+                return BadRequest($"Контакт с Id = {id} не существует");
+            }
+            return Ok(contact);
+        }
     }
 }
